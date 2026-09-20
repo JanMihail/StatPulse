@@ -1,0 +1,578 @@
+//###<Experts/My/StatPulse/StatPulse.mq5>
+
+// Универсальные макросы логирования ошибки
+#define PrintLastError()                                                                                               \
+    PrintFormat(                                                                                                       \
+        "FATAL ERROR: %s | %s:%d | LastError: %d, %s, %s",                                                             \
+        __FILE__,                                                                                                      \
+        __FUNCSIG__,                                                                                                   \
+        __LINE__,                                                                                                      \
+        GetLastError(),                                                                                                \
+        StatPulse::GetLastErrorLetterCode(),                                                                           \
+        StatPulse::GetLastErrorMessage()                                                                               \
+    );
+
+#define PrintLastErrorWithArgs(formatArgs)                                                                             \
+    PrintFormat(                                                                                                       \
+        "FATAL ERROR: %s | %s:%d | LastError: %d, %s, %s | Args: %s",                                                  \
+        __FILE__,                                                                                                      \
+        __FUNCSIG__,                                                                                                   \
+        __LINE__,                                                                                                      \
+        GetLastError(),                                                                                                \
+        StatPulse::GetLastErrorLetterCode(),                                                                           \
+        StatPulse::GetLastErrorMessage(),                                                                              \
+        formatArgs                                                                                                     \
+    );
+
+namespace StatPulse {
+
+class Logger {
+
+private:
+    static void Log(string level, string message) {
+        PrintFormat("%s: %s", level, message);
+    }
+
+public:
+    static void Debug(string message) {
+        Log("DEBUG", message);
+    }
+
+    static void Info(string message) {
+        Log("INFO", message);
+    }
+
+    static void Warn(string message) {
+        Log("WARN", message);
+    }
+
+    static void Error(string message) {
+        Log("ERROR", message);
+    }
+};
+
+string GetLastErrorLetterCode() {
+    switch (_LastError) {
+        case 0:     return "ERR_SUCCESS";
+        case 4001:  return "ERR_INTERNAL_ERROR";
+        case 4002:  return "ERR_WRONG_INTERNAL_PARAMETER";
+        case 4003:  return "ERR_INVALID_PARAMETER";
+        case 4004:  return "ERR_NOT_ENOUGH_MEMORY";
+        case 4005:  return "ERR_STRUCT_WITHOBJECTS_ORCLASS";
+        case 4006:  return "ERR_INVALID_ARRAY";
+        case 4007:  return "ERR_ARRAY_RESIZE_ERROR";
+        case 4008:  return "ERR_STRING_RESIZE_ERROR";
+        case 4009:  return "ERR_NOTINITIALIZED_STRING";
+        case 4010:  return "ERR_INVALID_DATETIME";
+        case 4011:  return "ERR_ARRAY_BAD_SIZE";
+        case 4012:  return "ERR_INVALID_POINTER";
+        case 4013:  return "ERR_INVALID_POINTER_TYPE";
+        case 4014:  return "ERR_FUNCTION_NOT_ALLOWED";
+        case 4015:  return "ERR_RESOURCE_NAME_DUPLICATED";
+        case 4016:  return "ERR_RESOURCE_NOT_FOUND";
+        case 4017:  return "ERR_RESOURCE_UNSUPPORTED_TYPE";
+        case 4018:  return "ERR_RESOURCE_NAME_IS_TOO_LONG";
+        case 4019:  return "ERR_MATH_OVERFLOW";
+        case 4020:  return "ERR_SLEEP_ERROR";
+        case 4022:  return "ERR_PROGRAM_STOPPED";
+        case 4023:  return "ERR_INVALID_TYPE";
+        case 4024:  return "ERR_INVALID_HANDLE";
+        case 4025:  return "ERR_TOO_MANY_OBJECTS  ";
+        case 4101:  return "ERR_CHART_WRONG_ID";
+        case 4102:  return "ERR_CHART_NO_REPLY";
+        case 4103:  return "ERR_CHART_NOT_FOUND";
+        case 4104:  return "ERR_CHART_NO_EXPERT";
+        case 4105:  return "ERR_CHART_CANNOT_OPEN";
+        case 4106:  return "ERR_CHART_CANNOT_CHANGE";
+        case 4107:  return "ERR_CHART_WRONG_PARAMETER";
+        case 4108:  return "ERR_CHART_CANNOT_CREATE_TIMER";
+        case 4109:  return "ERR_CHART_WRONG_PROPERTY";
+        case 4110:  return "ERR_CHART_SCREENSHOT_FAILED";
+        case 4111:  return "ERR_CHART_NAVIGATE_FAILED";
+        case 4112:  return "ERR_CHART_TEMPLATE_FAILED";
+        case 4113:  return "ERR_CHART_WINDOW_NOT_FOUND";
+        case 4114:  return "ERR_CHART_INDICATOR_CANNOT_ADD";
+        case 4115:  return "ERR_CHART_INDICATOR_CANNOT_DEL";
+        case 4116:  return "ERR_CHART_INDICATOR_NOT_FOUND";
+        case 4201:  return "ERR_OBJECT_ERROR";
+        case 4202:  return "ERR_OBJECT_NOT_FOUND";
+        case 4203:  return "ERR_OBJECT_WRONG_PROPERTY";
+        case 4204:  return "ERR_OBJECT_GETDATE_FAILED";
+        case 4205:  return "ERR_OBJECT_GETVALUE_FAILED";
+        case 4301:  return "ERR_MARKET_UNKNOWN_SYMBOL";
+        case 4302:  return "ERR_MARKET_NOT_SELECTED";
+        case 4303:  return "ERR_MARKET_WRONG_PROPERTY";
+        case 4304:  return "ERR_MARKET_LASTTIME_UNKNOWN";
+        case 4305:  return "ERR_MARKET_SELECT_ERROR";
+        case 4306:  return "ERR_MARKET_SELECT_LIMIT";
+        case 4307:  return "ERR_MARKET_SESSION_INDEX";
+        case 4401:  return "ERR_HISTORY_NOT_FOUND";
+        case 4402:  return "ERR_HISTORY_WRONG_PROPERTY";
+        case 4403:  return "ERR_HISTORY_TIMEOUT";
+        case 4404:  return "ERR_HISTORY_BARS_LIMIT";
+        case 4405:  return "ERR_HISTORY_LOAD_ERRORS";
+        case 4407:  return "ERR_HISTORY_SMALL_BUFFER";
+        case 4501:  return "ERR_GLOBALVARIABLE_NOT_FOUND";
+        case 4502:  return "ERR_GLOBALVARIABLE_EXISTS";
+        case 4503:  return "ERR_GLOBALVARIABLE_NOT_MODIFIED";
+        case 4504:  return "ERR_GLOBALVARIABLE_CANNOTREAD";
+        case 4505:  return "ERR_GLOBALVARIABLE_CANNOTWRITE";
+        case 4510:  return "ERR_MAIL_SEND_FAILED";
+        case 4511:  return "ERR_PLAY_SOUND_FAILED";
+        case 4512:  return "ERR_MQL5_WRONG_PROPERTY";
+        case 4513:  return "ERR_TERMINAL_WRONG_PROPERTY";
+        case 4514:  return "ERR_FTP_SEND_FAILED";
+        case 4515:  return "ERR_NOTIFICATION_SEND_FAILED";
+        case 4516:  return "ERR_NOTIFICATION_WRONG_PARAMETER";
+        case 4517:  return "ERR_NOTIFICATION_WRONG_SETTINGS";
+        case 4518:  return "ERR_NOTIFICATION_TOO_FREQUENT";
+        case 4519:  return "ERR_FTP_NOSERVER";
+        case 4520:  return "ERR_FTP_NOLOGIN";
+        case 4521:  return "ERR_FTP_FILE_ERROR";
+        case 4522:  return "ERR_FTP_CONNECT_FAILED";
+        case 4523:  return "ERR_FTP_CHANGEDIR";
+        case 4601:  return "ERR_BUFFERS_NO_MEMORY";
+        case 4602:  return "ERR_BUFFERS_WRONG_INDEX";
+        case 4603:  return "ERR_CUSTOM_WRONG_PROPERTY";
+        case 4701:  return "ERR_ACCOUNT_WRONG_PROPERTY";
+        case 4751:  return "ERR_TRADE_WRONG_PROPERTY";
+        case 4752:  return "ERR_TRADE_DISABLED";
+        case 4753:  return "ERR_TRADE_POSITION_NOT_FOUND";
+        case 4754:  return "ERR_TRADE_ORDER_NOT_FOUND";
+        case 4755:  return "ERR_TRADE_DEAL_NOT_FOUND";
+        case 4756:  return "ERR_TRADE_SEND_FAILED";
+        case 4758:  return "ERR_TRADE_CALC_FAILED";
+        case 4801:  return "ERR_INDICATOR_UNKNOWN_SYMBOL";
+        case 4802:  return "ERR_INDICATOR_CANNOT_CREATE";
+        case 4803:  return "ERR_INDICATOR_NO_MEMORY";
+        case 4804:  return "ERR_INDICATOR_CANNOT_APPLY";
+        case 4805:  return "ERR_INDICATOR_CANNOT_ADD";
+        case 4806:  return "ERR_INDICATOR_DATA_NOT_FOUND";
+        case 4807:  return "ERR_INDICATOR_WRONG_HANDLE";
+        case 4808:  return "ERR_INDICATOR_WRONG_PARAMETERS";
+        case 4809:  return "ERR_INDICATOR_PARAMETERS_MISSING";
+        case 4810:  return "ERR_INDICATOR_CUSTOM_NAME";
+        case 4811:  return "ERR_INDICATOR_PARAMETER_TYPE";
+        case 4812:  return "ERR_INDICATOR_WRONG_INDEX";
+        case 4901:  return "ERR_BOOKS_CANNOT_ADD";
+        case 4902:  return "ERR_BOOKS_CANNOT_DELETE";
+        case 4903:  return "ERR_BOOKS_CANNOT_GET";
+        case 4904:  return "ERR_BOOKS_CANNOT_SUBSCRIBE";
+        case 5001:  return "ERR_TOO_MANY_FILES";
+        case 5002:  return "ERR_WRONG_FILENAME";
+        case 5003:  return "ERR_TOO_LONG_FILENAME";
+        case 5004:  return "ERR_CANNOT_OPEN_FILE";
+        case 5005:  return "ERR_FILE_CACHEBUFFER_ERROR";
+        case 5006:  return "ERR_CANNOT_DELETE_FILE";
+        case 5007:  return "ERR_INVALID_FILEHANDLE";
+        case 5008:  return "ERR_WRONG_FILEHANDLE";
+        case 5009:  return "ERR_FILE_NOTTOWRITE";
+        case 5010:  return "ERR_FILE_NOTTOREAD";
+        case 5011:  return "ERR_FILE_NOTBIN";
+        case 5012:  return "ERR_FILE_NOTTXT";
+        case 5013:  return "ERR_FILE_NOTTXTORCSV";
+        case 5014:  return "ERR_FILE_NOTCSV";
+        case 5015:  return "ERR_FILE_READERROR";
+        case 5016:  return "ERR_FILE_BINSTRINGSIZE";
+        case 5017:  return "ERR_INCOMPATIBLE_FILE";
+        case 5018:  return "ERR_FILE_IS_DIRECTORY";
+        case 5019:  return "ERR_FILE_NOT_EXIST";
+        case 5020:  return "ERR_FILE_CANNOT_REWRITE";
+        case 5021:  return "ERR_WRONG_DIRECTORYNAME";
+        case 5022:  return "ERR_DIRECTORY_NOT_EXIST";
+        case 5023:  return "ERR_FILE_ISNOT_DIRECTORY";
+        case 5024:  return "ERR_CANNOT_DELETE_DIRECTORY";
+        case 5025:  return "ERR_CANNOT_CLEAN_DIRECTORY";
+        case 5026:  return "ERR_FILE_WRITEERROR";
+        case 5027:  return "ERR_FILE_ENDOFFILE";
+        case 5030:  return "ERR_NO_STRING_DATE";
+        case 5031:  return "ERR_WRONG_STRING_DATE";
+        case 5032:  return "ERR_WRONG_STRING_TIME";
+        case 5033:  return "ERR_STRING_TIME_ERROR";
+        case 5034:  return "ERR_STRING_OUT_OF_MEMORY";
+        case 5035:  return "ERR_STRING_SMALL_LEN";
+        case 5036:  return "ERR_STRING_TOO_BIGNUMBER";
+        case 5037:  return "ERR_WRONG_FORMATSTRING";
+        case 5038:  return "ERR_TOO_MANY_FORMATTERS";
+        case 5039:  return "ERR_TOO_MANY_PARAMETERS";
+        case 5040:  return "ERR_WRONG_STRING_PARAMETER";
+        case 5041:  return "ERR_STRINGPOS_OUTOFRANGE";
+        case 5042:  return "ERR_STRING_ZEROADDED";
+        case 5043:  return "ERR_STRING_UNKNOWNTYPE";
+        case 5044:  return "ERR_WRONG_STRING_OBJECT";
+        case 5050:  return "ERR_INCOMPATIBLE_ARRAYS";
+        case 5051:  return "ERR_SMALL_ASSERIES_ARRAY";
+        case 5052:  return "ERR_SMALL_ARRAY";
+        case 5053:  return "ERR_ZEROSIZE_ARRAY";
+        case 5054:  return "ERR_NUMBER_ARRAYS_ONLY";
+        case 5055:  return "ERR_ONEDIM_ARRAYS_ONLY";
+        case 5056:  return "ERR_SERIES_ARRAY";
+        case 5057:  return "ERR_DOUBLE_ARRAY_ONLY";
+        case 5058:  return "ERR_FLOAT_ARRAY_ONLY";
+        case 5059:  return "ERR_LONG_ARRAY_ONLY";
+        case 5060:  return "ERR_INT_ARRAY_ONLY";
+        case 5061:  return "ERR_SHORT_ARRAY_ONLY";
+        case 5062:  return "ERR_CHAR_ARRAY_ONLY";
+        case 5063:  return "ERR_STRING_ARRAY_ONLY";
+        case 5100:  return "ERR_OPENCL_NOT_SUPPORTED";
+        case 5101:  return "ERR_OPENCL_INTERNAL";
+        case 5102:  return "ERR_OPENCL_INVALID_HANDLE";
+        case 5103:  return "ERR_OPENCL_CONTEXT_CREATE";
+        case 5104:  return "ERR_OPENCL_QUEUE_CREATE";
+        case 5105:  return "ERR_OPENCL_PROGRAM_CREATE";
+        case 5106:  return "ERR_OPENCL_TOO_LONG_KERNEL_NAME";
+        case 5107:  return "ERR_OPENCL_KERNEL_CREATE";
+        case 5108:  return "ERR_OPENCL_SET_KERNEL_PARAMETER";
+        case 5109:  return "ERR_OPENCL_EXECUTE";
+        case 5110:  return "ERR_OPENCL_WRONG_BUFFER_SIZE";
+        case 5111:  return "ERR_OPENCL_WRONG_BUFFER_OFFSET";
+        case 5112:  return "ERR_OPENCL_BUFFER_CREATE";
+        case 5113:  return "ERR_OPENCL_TOO_MANY_OBJECTS";
+        case 5114:  return "ERR_OPENCL_SELECTDEVICE";
+        case 5120:  return "ERR_DATABASE_INTERNAL";
+        case 5121:  return "ERR_DATABASE_INVALID_HANDLE";
+        case 5122:  return "ERR_DATABASE_TOO_MANY_OBJECTS";
+        case 5123:  return "ERR_DATABASE_CONNECT";
+        case 5124:  return "ERR_DATABASE_EXECUTE";
+        case 5125:  return "ERR_DATABASE_PREPARE";
+        case 5126:  return "ERR_DATABASE_NO_MORE_DATA";
+        case 5127:  return "ERR_DATABASE_STEP";
+        case 5128:  return "ERR_DATABASE_NOT_READY";
+        case 5129:  return "ERR_DATABASE_BIND_PARAMETERS";
+        case 5130:  return "ERR_DATABASE_QUERY_NOT_READONLY";
+        case 5200:  return "ERR_WEBREQUEST_INVALID_ADDRESS";
+        case 5201:  return "ERR_WEBREQUEST_CONNECT_FAILED";
+        case 5202:  return "ERR_WEBREQUEST_TIMEOUT";
+        case 5203:  return "ERR_WEBREQUEST_REQUEST_FAILED";
+        case 5270:  return "ERR_NETSOCKET_INVALIDHANDLE";
+        case 5271:  return "ERR_NETSOCKET_TOO_MANY_OPENED";
+        case 5272:  return "ERR_NETSOCKET_CANNOT_CONNECT";
+        case 5273:  return "ERR_NETSOCKET_IO_ERROR";
+        case 5274:  return "ERR_NETSOCKET_HANDSHAKE_FAILED";
+        case 5275:  return "ERR_NETSOCKET_NO_CERTIFICATE";
+        case 5300:  return "ERR_NOT_CUSTOM_SYMBOL";
+        case 5301:  return "ERR_CUSTOM_SYMBOL_WRONG_NAME";
+        case 5302:  return "ERR_CUSTOM_SYMBOL_NAME_LONG";
+        case 5303:  return "ERR_CUSTOM_SYMBOL_PATH_LONG";
+        case 5304:  return "ERR_CUSTOM_SYMBOL_EXIST";
+        case 5305:  return "ERR_CUSTOM_SYMBOL_ERROR";
+        case 5306:  return "ERR_CUSTOM_SYMBOL_SELECTED";
+        case 5307:  return "ERR_CUSTOM_SYMBOL_PROPERTY_WRONG";
+        case 5308:  return "ERR_CUSTOM_SYMBOL_PARAMETER_ERROR";
+        case 5309:  return "ERR_CUSTOM_SYMBOL_PARAMETER_LONG";
+        case 5310:  return "ERR_CUSTOM_TICKS_WRONG_ORDER";
+        case 5400:  return "ERR_CALENDAR_MORE_DATA";
+        case 5401:  return "ERR_CALENDAR_TIMEOUT";
+        case 5402:  return "ERR_CALENDAR_NO_DATA";
+        case 5601:  return "ERR_DATABASE_ERROR  ";
+        case 5602:  return "ERR_DATABASE_LOGIC";
+        case 5603:  return "ERR_DATABASE_PERM";
+        case 5604:  return "ERR_DATABASE_ABORT";
+        case 5605:  return "ERR_DATABASE_BUSY";
+        case 5606:  return "ERR_DATABASE_LOCKED";
+        case 5607:  return "ERR_DATABASE_NOMEM";
+        case 5608:  return "ERR_DATABASE_READONLY";
+        case 5609:  return "ERR_DATABASE_INTERRUPT";
+        case 5610:  return "ERR_DATABASE_IOERR";
+        case 5611:  return "ERR_DATABASE_CORRUPT";
+        case 5612:  return "ERR_DATABASE_NOTFOUND";
+        case 5613:  return "ERR_DATABASE_FULL";
+        case 5614:  return "ERR_DATABASE_CANTOPEN";
+        case 5615:  return "ERR_DATABASE_PROTOCOL";
+        case 5616:  return "ERR_DATABASE_EMPTY";
+        case 5617:  return "ERR_DATABASE_SCHEMA";
+        case 5618:  return "ERR_DATABASE_TOOBIG";
+        case 5619:  return "ERR_DATABASE_CONSTRAINT";
+        case 5620:  return "ERR_DATABASE_MISMATCH";
+        case 5621:  return "ERR_DATABASE_MISUSE";
+        case 5622:  return "ERR_DATABASE_NOLFS";
+        case 5623:  return "ERR_DATABASE_AUTH";
+        case 5624:  return "ERR_DATABASE_FORMAT";
+        case 5625:  return "ERR_DATABASE_RANGE";
+        case 5626:  return "ERR_DATABASE_NOTADB";
+        case 5700:  return "ERR_MATRIX_INTERNAL";
+        case 5701:  return "ERR_MATRIX_NOT_INITIALIZED";
+        case 5702:  return "ERR_MATRIX_INCONSISTENT";
+        case 5703:  return "ERR_MATRIX_INVALID_SIZE";
+        case 5704:  return "ERR_MATRIX_INVALID_TYPE";
+        case 5705:  return "ERR_MATRIX_FUNC_NOT_ALLOWED";
+        case 5706:  return "ERR_MATRIX_CONTAINS_NAN";
+        case 5707:  return "ERR_MATRIX_OPENBLAS";
+        case 5708:  return "ERR_MATRIX_OPENBLAS_PARAMETER";
+        case 5800:  return "ERR_ONNX_INTERNAL";
+        case 5801:  return "ERR_ONNX_NOT_INITIALIZED";
+        case 5802:  return "ERR_ONNX_NOT_SUPPORTED";
+        case 5803:  return "ERR_ONNX_RUN_FAILED";
+        case 5804:  return "ERR_ONNX_INVALID_PARAMETERS_COUNT";
+        case 5805:  return "ERR_ONNX_INVALID_PARAMETER";
+        case 5806:  return "ERR_ONNX_INVALID_PARAMETER_TYPE";
+        case 5807:  return "ERR_ONNX_INVALID_PARAMETER_SIZE";
+        case 5808:  return "ERR_ONNX_WRONG_DIMENSION";
+        case 65536: return "ERR_USER_ERROR_FIRST";
+        default:    return "ERR_UNKNOWN";
+    }
+} 
+
+string GetLastErrorMessage() {
+    switch (_LastError) {
+        case 0:     return "Операция выполнена успешно";
+        case 4001:  return "Неожиданная внутренняя ошибка";
+        case 4002:  return "Ошибочный параметр при внутреннем вызове функции клиентского терминала";
+        case 4003:  return "Ошибочный параметр при вызове системной функции";
+        case 4004:  return "Недостаточно памяти для выполнения системной функции";
+        case 4005:  return "Структура содержит объекты строк и/или динамических массивов и/или структуры с такими объектами и/или классы";
+        case 4006:  return "Массив неподходящего типа, неподходящего размера или испорченный объект динамического массива";
+        case 4007:  return "Недостаточно памяти для перераспределения массива либо попытка изменения размера статического массива";
+        case 4008:  return "Недостаточно памяти для перераспределения строки";
+        case 4009:  return "Неинициализированная строка";
+        case 4010:  return "Неправильное значение даты и/или времени";
+        case 4011:  return "Общее число элементов в массиве не может превышать 2147483647";
+        case 4012:  return "Ошибочный указатель";
+        case 4013:  return "Ошибочный тип указателя";
+        case 4014:  return "Системная функция не разрешена для вызова";
+        case 4015:  return "Совпадение имени динамического и статического ресурсов";
+        case 4016:  return "Ресурс с таким именем в EX5 не найден";
+        case 4017:  return "Неподдерживаемый тип ресурса или размер более 16 MB";
+        case 4018:  return "Имя ресурса превышает 63 символа";
+        case 4019:  return "При вычислении математической функции произошло переполнение";
+        case 4020:  return "Выход за дату окончания тестирования после вызова Sleep()";
+        case 4022:  return "Тестирование было прекращено принудительно извне. Например, прервана оптимизацию, или закрыто окно визуального тестирования, или остановлен агент тестирования";
+        case 4023:  return "Неподходящий тип";
+        case 4024:  return "Невалидный хендл";
+        case 4025:  return "Пул объектов заполнен";
+        case 4101:  return "Ошибочный идентификатор графика";
+        case 4102:  return "График не отвечает";
+        case 4103:  return "График не найден";
+        case 4104:  return "У графика нет эксперта, который мог бы обработать событие";
+        case 4105:  return "Ошибка открытия графика";
+        case 4106:  return "Ошибка при изменении для графика символа и периода";
+        case 4107:  return "Ошибочное значение параметра для функции по работе с графиком";
+        case 4108:  return "Ошибка при создании таймера";
+        case 4109:  return "Ошибочный идентификатор свойства графика";
+        case 4110:  return "Ошибка при создании скриншота";
+        case 4111:  return "Ошибка навигации по графику";
+        case 4112:  return "Ошибка при применении шаблона";
+        case 4113:  return "Подокно, содержащее указанный индикатор, не найдено";
+        case 4114:  return "Ошибка при добавлении индикатора на график";
+        case 4115:  return "Ошибка при удалении индикатора с графика";
+        case 4116:  return "Индикатор не найден на указанном графике";
+        case 4201:  return "Ошибка при работе с графическим объектом";
+        case 4202:  return "Графический объект не найден";
+        case 4203:  return "Ошибочный идентификатор свойства графического объекта";
+        case 4204:  return "Невозможно получить дату, соответствующую значению";
+        case 4205:  return "Невозможно получить значение, соответствующее дате";
+        case 4301:  return "Неизвестный символ";
+        case 4302:  return "Символ не выбран в MarketWatch";
+        case 4303:  return "Ошибочный идентификатор свойства символа";
+        case 4304:  return "Время последнего тика неизвестно (тиков не было)";
+        case 4305:  return "Ошибка добавления или удаления символа в MarketWatch";
+        case 4306:  return "Превышен лимит выбранных символов в MarketWatch";
+        case 4307:  return "Неправильный индекс сессии при вызове функции SymbolInfoSessionQuote/SymbolInfoSessionTrade";
+        case 4401:  return "Запрашиваемая история не найдена";
+        case 4402:  return "Ошибочный идентификатор свойства истории";
+        case 4403:  return "Превышен таймаут при запросе истории";
+        case 4404:  return "Количество запрашиваемых баров ограничено настройками терминала";
+        case 4405:  return "Множество ошибок при загрузке истории";
+        case 4407:  return "Принимающий массив слишком мал чтобы вместить все запрошенные данные";
+        case 4501:  return "Глобальная переменная клиентского терминала не найдена";
+        case 4502:  return "Глобальная переменная клиентского терминала с таким именем уже существует";
+        case 4503:  return "Не было модификаций глобальных переменных";
+        case 4504:  return "Не удалось открыть и прочитать файл со значениями глобальных переменных";
+        case 4505:  return "Не удалось записать файл со значениями глобальных переменных";
+        case 4510:  return "Не удалось отправить письмо";
+        case 4511:  return "Не удалось воспроизвести звук";
+        case 4512:  return "Ошибочный идентификатор свойства программы";
+        case 4513:  return "Ошибочный идентификатор свойства терминала";
+        case 4514:  return "Не удалось отправить файл по ftp";
+        case 4515:  return "Не удалось отправить уведомление";
+        case 4516:  return "Неверный параметр для отправки уведомления – в функцию SendNotification()  передали пустую строку или NULL";
+        case 4517:  return "Неверные настройки уведомлений в терминале (не указан ID или не выставлено разрешение)";
+        case 4518:  return "Слишком частая отправка уведомлений";
+        case 4519:  return "Не указан FTP сервер";
+        case 4520:  return "Не указан FTP логин";
+        case 4521:  return "Не найден файл в директории MQL5\\Files для отправки на FTP сервер";
+        case 4522:  return "Ошибка при подключении к FTP серверу";
+        case 4523:  return "На FTP сервере не найдена директория для выгрузки файла";
+        case 4601:  return "Недостаточно памяти для распределения индикаторных буферов";
+        case 4602:  return "Ошибочный индекс своего индикаторного буфера";
+        case 4603:  return "Ошибочный идентификатор свойства пользовательского индикатора";
+        case 4701:  return "Ошибочный идентификатор свойства счета";
+        case 4751:  return "Ошибочный идентификатор свойства торговли";
+        case 4752:  return "Торговля для эксперта запрещена";
+        case 4753:  return "Позиция не найдена";
+        case 4754:  return "Ордер не найден";
+        case 4755:  return "Сделка не найдена";
+        case 4756:  return "Не удалось отправить торговый запрос";
+        case 4758:  return "Не удалось вычислить значение прибыли или маржи";
+        case 4801:  return "Неизвестный символ";
+        case 4802:  return "Индикатор не может быть создан";
+        case 4803:  return "Недостаточно памяти для добавления индикатора";
+        case 4804:  return "Индикатор не может быть применен к другому индикатору";
+        case 4805:  return "Ошибка при добавлении индикатора";
+        case 4806:  return "Запрошенные данные не найдены";
+        case 4807:  return "Ошибочный хэндл индикатора";
+        case 4808:  return "Неправильное количество параметров при создании индикатора";
+        case 4809:  return "Отсутствуют параметры при создании индикатора";
+        case 4810:  return "Первым параметром в массиве должно быть имя пользовательского индикатора";
+        case 4811:  return "Неправильный тип параметра в массиве при создании индикатора";
+        case 4812:  return "Ошибочный индекс запрашиваемого индикаторного буфера";
+        case 4901:  return "Стакан цен не может быть добавлен";
+        case 4902:  return "Стакан цен не может быть удален";
+        case 4903:  return "Данные стакана цен не могут быть получены";
+        case 4904:  return "Ошибка при подписке на получение новых данных стакана цен";
+        case 5001:  return "Не может быть открыто одновременно более 64 файлов";
+        case 5002:  return "Недопустимое имя файла";
+        case 5003:  return "Слишком длинное имя файла";
+        case 5004:  return "Ошибка открытия файла";
+        case 5005:  return "Недостаточно памяти для кеша чтения";
+        case 5006:  return "Ошибка удаления файла";
+        case 5007:  return "Файл с таким хэндлом уже был закрыт, либо не открывался вообще";
+        case 5008:  return "Ошибочный хэндл файла";
+        case 5009:  return "Файл должен быть открыт для записи";
+        case 5010:  return "Файл должен быть открыт для чтения";
+        case 5011:  return "Файл должен быть открыт как бинарный";
+        case 5012:  return "Файл должен быть открыт как текстовый";
+        case 5013:  return "Файл должен быть открыт как текстовый или CSV";
+        case 5014:  return "Файл должен быть открыт как CSV";
+        case 5015:  return "Ошибка чтения файла";
+        case 5016:  return "Должен быть указан размер строки, так как файл открыт как бинарный";
+        case 5017:  return "Для строковых массивов должен быть текстовый файл, для остальных – бинарный";
+        case 5018:  return "Это не файл, а директория";
+        case 5019:  return "Файл не существует";
+        case 5020:  return "Файл не может быть переписан";
+        case 5021:  return "Ошибочное имя директории";
+        case 5022:  return "Директория не существует";
+        case 5023:  return "Это файл, а не директория";
+        case 5024:  return "Директория не может быть удалена";
+        case 5025:  return "Не удалось очистить директорию (возможно, один или несколько файлов заблокированы и операция удаления не удалась)";
+        case 5026:  return "Не удалось записать ресурс в файл";
+        case 5027:  return "Не удалось прочитать следующую порцию данных из CSV-файла (FileReadString, FileReadNumber, FileReadDatetime, FileReadBool), так как достигнут конец файла";
+        case 5030:  return "В строке нет даты";
+        case 5031:  return "В строке ошибочная дата";
+        case 5032:  return "В строке ошибочное время";
+        case 5033:  return "Ошибка преобразования строки в дату";
+        case 5034:  return "Недостаточно памяти для строки";
+        case 5035:  return "Длина строки меньше, чем ожидалось";
+        case 5036:  return "Слишком большое число, больше, чем ULONG_MAX";
+        case 5037:  return "Ошибочная форматная строка";
+        case 5038:  return "Форматных спецификаторов больше, чем параметров";
+        case 5039:  return "Параметров больше, чем форматных спецификаторов";
+        case 5040:  return "Испорченный параметр типа string";
+        case 5041:  return "Позиция за пределами строки";
+        case 5042:  return "К концу строки добавлен 0, бесполезная операция";
+        case 5043:  return "Неизвестный тип данных при конвертации в строку";
+        case 5044:  return "Испорченный объект строки";
+        case 5050:  return "Копирование несовместимых массивов. Строковый массив может быть скопирован только в строковый, а числовой массив – в числовой";
+        case 5051:  return "Приемный массив объявлен как AS_SERIES, и он недостаточного размера";
+        case 5052:  return "Слишком маленький массив, стартовая позиция за пределами массива";
+        case 5053:  return "Массив нулевой длины";
+        case 5054:  return "Должен быть числовой массив";
+        case 5055:  return "Должен быть одномерный массив";
+        case 5056:  return "Таймсерия не может быть использована";
+        case 5057:  return "Должен быть массив типа double";
+        case 5058:  return "Должен быть массив типа float";
+        case 5059:  return "Должен быть массив типа long";
+        case 5060:  return "Должен быть массив типа int";
+        case 5061:  return "Должен быть массив типа short";
+        case 5062:  return "Должен быть массив типа char";
+        case 5063:  return "Должен быть массив типа string";
+        case 5100:  return "Функции OpenCL на данном компьютере не поддерживаются";
+        case 5101:  return "Внутренняя ошибка при выполнении OpenCL";
+        case 5102:  return "Неправильный хэндл OpenCL";
+        case 5103:  return "Ошибка при создании контекста OpenCL";
+        case 5104:  return "Ошибка создания очереди выполнения в OpenCL";
+        case 5105:  return "Ошибка при компиляции программы OpenCL";
+        case 5106:  return "Слишком длинное имя точки входа (кернел OpenCL)";
+        case 5107:  return "Ошибка создания кернел - точки входа OpenCL";
+        case 5108:  return "Ошибка при установке параметров для кернел OpenCL (точки входа в программу OpenCL)";
+        case 5109:  return "Ошибка выполнения программы OpenCL";
+        case 5110:  return "Неверный размер буфера OpenCL";
+        case 5111:  return "Неверное смещение в буфере OpenCL";
+        case 5112:  return "Ошибка создания буфера OpenCL";
+        case 5113:  return "Превышено максимальное число OpenCL объектов";
+        case 5114:  return "Ошибка выбора OpenCL устройства";
+        case 5120:  return "Внутренняя ошибка базы данных";
+        case 5121:  return "Невалидный хендл базы данных";
+        case 5122:  return "Превышено максимально допустимое количество объектов Database";
+        case 5123:  return "Ошибка подключения к базе данных";
+        case 5124:  return "Ошибка выполнения запроса";
+        case 5125:  return "Ошибка создания запроса";
+        case 5126:  return "Данных для чтения больше нет";
+        case 5127:  return "Ошибка перехода к следующей записи запроса";
+        case 5128:  return "Данные для чтения результатов запроса еще не готовы";
+        case 5129:  return "Ошибка автоподстановки параметров в SQL-запрос";
+        case 5130:  return " ";
+        case 5200:  return "URL не прошел проверку";
+        case 5201:  return "Не удалось подключиться к указанному URL";
+        case 5202:  return "Превышен таймаут получения данных";
+        case 5203:  return "Ошибка в результате выполнения HTTP запроса";
+        case 5270:  return "В функцию передан неверный хэндл сокета";
+        case 5271:  return "Открыто слишком много сокетов (максимум 128)";
+        case 5272:  return "Ошибка соединения с удаленным хостом";
+        case 5273:  return "Ошибка отправки/получения данных из сокета";
+        case 5274:  return "Ошибка установления защищенного соединения (TLS Handshake)";
+        case 5275:  return "Отсутствуют данные о сертификате, которым защищено подключение";
+        case 5300:  return "Должен быть указан пользовательский символ";
+        case 5301:  return "Некорректное имя пользовательского символа. В имени символа можно использовать только латинские буквы без знаков препинания, пробелов и спецсимволов (допускаются \".\", \"_\", \"&\" и \"#\"). Не рекомендуется использовать символы <, >, :, \", /,\\, |, ?, *.";
+        case 5302:  return "Слишком длинное имя для пользовательского символа. Длина имени символа не должна превышать 32 знака с учётом завершающего 0";
+        case 5303:  return "Слишком длинный путь для пользовательского символа. Длина пути не более 128 знаков с учётом \"Custom\\\", имени символа, разделителей групп и завершающего 0";
+        case 5304:  return "Пользовательский символ с таким именем уже существует";
+        case 5305:  return "Ошибка при создании, удалении или изменении пользовательского символа";
+        case 5306:  return "Попытка удалить пользовательский символ, выбранный в обзоре рынка (Market Watch)";
+        case 5307:  return "Неправильное свойство пользовательского символа";
+        case 5308:  return "Ошибочный параметр при установке свойства пользовательского символа";
+        case 5309:  return "Слишком длинный строковый параметр при установке свойства пользовательского символа";
+        case 5310:  return "Не упорядоченный по времени массив тиков";
+        case 5400:  return "Размер массива недостаточен для получения описаний всех значений";
+        case 5401:  return "Превышен лимит запроса по времени";
+        case 5402:  return "Страна не найдена";
+        case 5601:  return "Общая ошибка";
+        case 5602:  return "Внутренняя логическая ошибка в SQLite";
+        case 5603:  return "Отказано в доступе";
+        case 5604:  return "Процедура обратного вызова запросила прерывание";
+        case 5605:  return "Файл базы данных заблокирован";
+        case 5606:  return "Таблица в базе данных заблокирована";
+        case 5607:  return "Сбой malloc ()";
+        case 5608:  return "Попытка записи в базу данных, доступной только для чтения";
+        case 5609:  return "Операция прекращена с помощью sqlite3_interrupt ()";
+        case 5610:  return "Ошибка дискового ввода-вывода";
+        case 5611:  return "Образ диска базы данных испорчен";
+        case 5612:  return "Неизвестный код операции в sqlite3_file_control ()";
+        case 5613:  return "Ошибка вставки, так как база данных заполнена";
+        case 5614:  return "Невозможно открыть файл базы данных";
+        case 5615:  return "Ошибка протокола блокировки базы данных";
+        case 5616:  return "Только для внутреннего использования";
+        case 5617:  return "Схема базы данных изменена";
+        case 5618:  return "Строка или BLOB превышает ограничение по размеру";
+        case 5619:  return "Прервано из-за нарушения ограничения";
+        case 5620:  return "Несоответствие типов данных";
+        case 5621:  return "Ошибка неправильного использования библиотеки";
+        case 5622:  return "Использование функций операционной системы, не поддерживаемых на хосте";
+        case 5623:  return "Отказано в авторизации";
+        case 5624:  return "Не используется";
+        case 5625:  return "2-й параметр для sqlite3_bind находится вне диапазона";
+        case 5626:  return "Открытый файл не является файлом базы данных";
+        case 5700:  return "Внутренняя ошибка исполняющей подсистемы матриц/векторов";
+        case 5701:  return "Матрица/вектор не инициализирован";
+        case 5702:  return "Несогласованный размер матриц/векторов в операции";
+        case 5703:  return "Некорректный размер матрицы/вектора";
+        case 5704:  return "Некорректный тип матрицы/вектора";
+        case 5705:  return "Функция недоступна для данной матрицы/вектора";
+        case 5706:  return "Матрица/вектор содержит нечисла (Nan/Inf)";
+        case 5707:  return "Ошибка при выполнении openblas-функции";
+        case 5708:  return "Ошибочный параметр openblas-функции";
+        case 5800:  return "Внутренняя ошибка ONNX стандарта";
+        case 5801:  return "Ошибка инициализации ONNX Runtime API";
+        case 5802:  return "Свойство или значение неподдерживаются языком MQL5";
+        case 5803:  return "Ошибка запуска ONNX runtime API";
+        case 5804:  return "В OnnxRun передано неверное количество параметров";
+        case 5805:  return "Некорректное значение параметра";
+        case 5806:  return "Некорректный тип параметра";
+        case 5807:  return "Некорректный размер параметра";
+        case 5808:  return "Размерность тензора не задана или указана неверно";
+        case 65536: return "С этого кода начинаются ошибки, задаваемые пользователем";
+        default:    return "Неизвестная ошибка";
+    }
+}
+
+}
