@@ -4,6 +4,7 @@
 #include "MotionStatUi.mqh"
 #include "MotionTracker.mqh"
 #include "MqlUtils.mqh"
+#include "TradeStrategy.mqh"
 #include "lib/Logger.mqh"
 
 //================== INPUTS ==========================================
@@ -54,6 +55,7 @@ MotionTracker motionTracker1;
 MotionTracker motionTracker2;
 MotionTracker motionTracker3;
 MotionStatUi motionStatUi;
+TradeStrategy tradeStrategy;
 
 int OnInit() {
     Logger::Info("Инициализация бинов...");
@@ -63,6 +65,7 @@ int OnInit() {
     isOk = isOk && motionTracker2.Init(&motionStatUi, TIMEFRAME_2, ATR_PERIOD_2, KOEF_ATR_2, WINDOW_SIZE_2);
     isOk = isOk && motionTracker3.Init(&motionStatUi, TIMEFRAME_3, ATR_PERIOD_3, KOEF_ATR_3, WINDOW_SIZE_3);
     isOk = isOk && motionStatUi.Init();
+    isOk = isOk && tradeStrategy.Init(&motionTracker1, &motionTracker2, &motionTracker3);
 
     if (!isOk) {
         return INIT_FAILED;
@@ -96,7 +99,7 @@ void OnDeinit(const int reasonCode) {
 }
 
 void OnTick() {
-    if (!warmUp) {
+    if (!warmUp && IsTestingMode()) {
         WarmUp();
         return;
     }
@@ -104,6 +107,7 @@ void OnTick() {
     motionTracker1.OnTick();
     motionTracker2.OnTick();
     motionTracker3.OnTick();
+    tradeStrategy.OnTick();
 }
 
 // Запуск прогрева необходимо запускать за пределами OnInit,

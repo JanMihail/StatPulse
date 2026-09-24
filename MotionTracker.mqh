@@ -18,13 +18,15 @@ private:
     MotionDrawer *const motionDrawer; // Рисовальщик движений
     MotionStatUi *motionStatUi;       // Графическая панель со статистикой движений
     Motion *currentMotion;            // Текущее незавершённое движение
+    double currentMotionPct;          // Перцентиля текущего движения
 
 public:
     MotionTracker()
         : atr(new ATR()),
           motionBuffer(new MotionBuffer()),
           motionDrawer(new MotionDrawer()),
-          currentMotion(NULL) {}
+          currentMotion(NULL),
+          currentMotionPct(0.0) {}
 
     bool Init(
         MotionStatUi *pMotionStatUi,
@@ -139,15 +141,27 @@ public:
 
         OnNewTick(Point(lastTick.time, lastTick.bid), atr.GetValue(0));
 
+        // Обновляем перцентилю текущего движения
+        currentMotionPct = PCT_CALC_MODE == PCT_CALC_MODE_ALL
+                               ? motionBuffer.CalculatePercentile(currentMotion)
+                               : motionBuffer.CalculatePercentileSameDirection(currentMotion);
+
         // Отрисовываем текущее движение
         motionDrawer.Draw(currentMotion);
 
         // Обновляем данные в панели со статистикой
-        double pct = PCT_CALC_MODE == PCT_CALC_MODE_ALL ? motionBuffer.CalculatePercentile(currentMotion)
-                                                        : motionBuffer.CalculatePercentileSameDirection(currentMotion);
-        motionStatUi.UpdateLabels(timeframe, currentMotion.GetDirectionString(), pct);
+        motionStatUi.UpdateLabels(timeframe, currentMotion.GetDirectionString(), currentMotionPct);
     }
 
+    Motion *GetCurrentMotion() const {
+        return currentMotion;
+    }
+
+    double GetCurrentMotionPct() const {
+        return currentMotionPct;
+    }
+
+private:
     void OnNewTick(const Point &tickPoint, const double atrValue) {
 
         // Если движения нет - это первая итерация, инициализируем его

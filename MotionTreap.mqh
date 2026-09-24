@@ -129,8 +129,9 @@ public:
 
 private:
     Node *Erase(Node *nRoot, const Motion &motion) {
-        if (nRoot == NULL)
+        if (nRoot == NULL) {
             return NULL;
+        }
 
         if (MotionTreap::Node::Equals(nRoot.motion, motion)) {
             Node *temp = NULL;

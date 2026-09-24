@@ -45,15 +45,16 @@ public:
 
     void Add(const Motion &motion) {
         if (buffer.Count() == maxSize) {
-            treap.Erase(buffer.First().Value());
+            Motion *firstMotion = buffer.First().Value();
+            treap.Erase(firstMotion);
 
-            if (motion.GetDirection() == MOTION_DIRECTION_UP) {
-                treapUp.Erase(buffer.First().Value());
-            } else {
-                treapDown.Erase(buffer.First().Value());
+            if (firstMotion.GetDirection() == MOTION_DIRECTION_UP) {
+                treapUp.Erase(firstMotion);
+            } else if (firstMotion.GetDirection() == MOTION_DIRECTION_DOWN) {
+                treapDown.Erase(firstMotion);
             }
 
-            delete buffer.First().Value();
+            delete firstMotion;
             buffer.RemoveFirst();
         }
 
@@ -64,7 +65,7 @@ public:
 
         if (newMotion.GetDirection() == MOTION_DIRECTION_UP) {
             treapUp.Insert(newMotion);
-        } else {
+        } else if (motion.GetDirection() == MOTION_DIRECTION_DOWN) {
             treapDown.Insert(newMotion);
         }
     }
